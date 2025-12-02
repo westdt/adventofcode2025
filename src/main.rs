@@ -5,7 +5,7 @@ use std::{
     env,
     fs::{create_dir, read_dir, read_to_string},
     io::{Write, stdin, stdout},
-    process::exit,
+    process::exit, time::Duration,
 };
 
 const RESET: &str = "\x1b[0m";
@@ -138,8 +138,9 @@ fn main() {
     let part = part.unwrap();
 
     if puzzle.is_none() {
-        println!("Please enter the desired {CYAN_BOLD}puzzle input filepath{RESET}.");
+        println!("Please enter the desired {CYAN_BOLD}puzzle input filepath{RESET} or a {CYAN_BOLD}number{RESET} to select from the list below.");
 
+        let mut options: Vec<String> = Vec::new();
         if let Ok(puzzles) = read_dir("./puzzles") {
             let mut puzzles = puzzles.collect::<Vec<_>>();
             puzzles.sort_by(|a, b| {
@@ -160,10 +161,10 @@ fn main() {
                 }
             });
 
-            for puzzle in puzzles {
+            for (index, puzzle) in puzzles.iter().enumerate() {
                 if let Ok(puzzle) = puzzle {
                     let name = puzzle.file_name();
-                    let name = name.to_string_lossy();
+                    let name = name.to_string_lossy().to_string();
 
                     let mut nums = Vec::new();
                     let mut num_str = String::new();
@@ -179,10 +180,12 @@ fn main() {
                     }
 
                     if nums.contains(&day) {
-                        println!("\t>\tpuzzles/{CYAN_BOLD}{name}{RESET}");
+                        println!("\t{CYAN_BOLD}{}{RESET}\tpuzzles/{CYAN_BOLD}{name}{RESET}", index + 1);
                     } else {
-                        println!("\t>\tpuzzles/{name}");
+                        println!("\t{CYAN_BOLD}{}{RESET}\tpuzzles/{name}", index + 1);
                     }
+
+                    options.push(name);
                 }
             }
         } else {
@@ -196,7 +199,13 @@ fn main() {
         stdin().read_line(&mut input).unwrap();
 
         puzzle = Some(input.trim().to_string());
+        if let Ok(number) = input.trim().parse::<usize>() {
+            if let Some(option) = options.get(number - 1) {
+                puzzle = Some(format!("puzzles/{}", option));
+            }
+        }
     }
+    print!("Thinking");
     let puzzle = puzzle.unwrap();
     let puzzle = match read_to_string(&puzzle) {
         Ok(puzzle) => puzzle,
@@ -208,8 +217,19 @@ fn main() {
         }
     };
 
+    std::thread::spawn(|| {
+        const N: usize = 5;
+        let mut n = 3;
+        loop {
+            print!("\rThinking{}{}", ".".repeat(n), " ".repeat((N - 1) - n));
+            stdout().flush().unwrap();
+            n = (n + 1) % N;
+            std::thread::sleep(Duration::from_millis(700));
+        }
+    });
+
     println!(
-        "{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{}{RESET}",
+        "\r{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{}{RESET}",
         match day {
             1 => Into::<day1::Puzzle>::into(puzzle).solve(part),
             _ => {
