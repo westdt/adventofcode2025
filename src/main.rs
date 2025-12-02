@@ -5,7 +5,8 @@ use std::{
     env,
     fs::{create_dir, read_dir, read_to_string},
     io::{Write, stdin, stdout},
-    process::exit, time::Duration,
+    process::exit,
+    time::Duration,
 };
 
 const RESET: &str = "\x1b[0m";
@@ -41,7 +42,7 @@ const WHITE_BOLD: &str = "\x1b[1;37m";
 const WHITE_ITALIC: &str = "\x1b[3;37m";
 const WHITE_BOLD_ITALIC: &str = "\x1b[1;3;37m";
 const MIN_DAY: usize = 1;
-const MAX_DAY: usize = 1;
+const MAX_DAY: usize = 2;
 
 enum Part {
     One,
@@ -49,6 +50,7 @@ enum Part {
 }
 
 mod day1;
+mod day2;
 
 trait Solve<T: ToString> {
     fn solve(&self, part: Part) -> String {
@@ -63,11 +65,19 @@ trait Solve<T: ToString> {
 }
 
 fn get_day_from_str(day: &str) -> usize {
-    match day {
-        "1" => 1,
+    match day.parse() {
+        Ok(day) => match day {
+            MIN_DAY..=MAX_DAY => day,
+            _ => {
+                println!(
+                    "{RED_BOLD}Oops!{RESET} You entered an invalid day. Day must be an integer between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
+                );
+                exit(1)
+            }
+        },
         _ => {
             println!(
-                "{RED_BOLD}Oops!{RESET} You entered an invalid day. Day must be between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
+                "{RED_BOLD}Oops!{RESET} You entered an invalid day. Day must be an integer between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
             );
             exit(1)
         }
@@ -111,6 +121,7 @@ fn main() {
     if day.is_none() {
         println!("Please enter a {GREEN_BOLD}number{RESET} to select the day.");
         println!("\t{GREEN_BOLD}1{RESET}\t{BOLD}Day 1{RESET}: Secret Entrance");
+        println!("\t{GREEN_BOLD}2{RESET}\t{BOLD}Day 2{RESET}: Gift Shop");
 
         print!("... ");
         stdout().flush().unwrap();
@@ -138,7 +149,9 @@ fn main() {
     let part = part.unwrap();
 
     if puzzle.is_none() {
-        println!("Please enter the desired {CYAN_BOLD}puzzle input filepath{RESET} or a {CYAN_BOLD}number{RESET} to select from the list below.");
+        println!(
+            "Please enter the desired {CYAN_BOLD}puzzle input filepath{RESET} or a {CYAN_BOLD}number{RESET} to select from the list below."
+        );
 
         let mut options: Vec<String> = Vec::new();
         if let Ok(puzzles) = read_dir("./puzzles") {
@@ -180,7 +193,10 @@ fn main() {
                     }
 
                     if nums.contains(&day) {
-                        println!("\t{CYAN_BOLD}{}{RESET}\tpuzzles/{CYAN_BOLD}{name}{RESET}", index + 1);
+                        println!(
+                            "\t{CYAN_BOLD}{}{RESET}\tpuzzles/{CYAN_BOLD}{name}{RESET}",
+                            index + 1
+                        );
                     } else {
                         println!("\t{CYAN_BOLD}{}{RESET}\tpuzzles/{name}", index + 1);
                     }
@@ -219,7 +235,7 @@ fn main() {
 
     std::thread::spawn(|| {
         const N: usize = 5;
-        let mut n = 3;
+        let mut n = 2;
         loop {
             print!("\rThinking{}{}", ".".repeat(n), " ".repeat((N - 1) - n));
             stdout().flush().unwrap();
@@ -232,6 +248,7 @@ fn main() {
         "\r{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{}{RESET}",
         match day {
             1 => Into::<day1::Puzzle>::into(puzzle).solve(part),
+            2 => Into::<day2::Puzzle>::into(puzzle).solve(part),
             _ => {
                 println!(
                     "{RED_BOLD}Oops!{RESET} You entered an invalid day. Please select between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
