@@ -1,0 +1,223 @@
+#![allow(dead_code)]
+
+use std::{
+    collections::VecDeque,
+    env,
+    fs::{create_dir, read_dir, read_to_string},
+    io::{Write, stdin, stdout},
+    process::exit,
+};
+
+const RESET: &str = "\x1b[0m";
+const BOLD: &str = "\x1b[1m";
+const ITALIC: &str = "\x1b[3m";
+const BOLD_ITALIC: &str = "\x1b[1;3m";
+const RED: &str = "\x1b[31m";
+const RED_BOLD: &str = "\x1b[1;31m";
+const RED_ITALIC: &str = "\x1b[3;31m";
+const RED_BOLD_ITALIC: &str = "\x1b[1;3;31m";
+const GREEN: &str = "\x1b[32m";
+const GREEN_BOLD: &str = "\x1b[1;32m";
+const GREEN_ITALIC: &str = "\x1b[3;32m";
+const GREEN_BOLD_ITALIC: &str = "\x1b[1;3;32m";
+const YELLOW: &str = "\x1b[33m";
+const YELLOW_BOLD: &str = "\x1b[1;33m";
+const YELLOW_ITALIC: &str = "\x1b[3;33m";
+const YELLOW_BOLD_ITALIC: &str = "\x1b[1;3;33m";
+const BLUE: &str = "\x1b[34m";
+const BLUE_BOLD: &str = "\x1b[1;34m";
+const BLUE_ITALIC: &str = "\x1b[3;34m";
+const BLUE_BOLD_ITALIC: &str = "\x1b[1;3;34m";
+const MAGENTA: &str = "\x1b[35m";
+const MAGENTA_BOLD: &str = "\x1b[1;35m";
+const MAGENTA_ITALIC: &str = "\x1b[3;35m";
+const MAGENTA_BOLD_ITALIC: &str = "\x1b[1;3;35m";
+const CYAN: &str = "\x1b[36m";
+const CYAN_BOLD: &str = "\x1b[1;36m";
+const CYAN_ITALIC: &str = "\x1b[3;36m";
+const CYAN_BOLD_ITALIC: &str = "\x1b[1;3;36m";
+const WHITE: &str = "\x1b[37m";
+const WHITE_BOLD: &str = "\x1b[1;37m";
+const WHITE_ITALIC: &str = "\x1b[3;37m";
+const WHITE_BOLD_ITALIC: &str = "\x1b[1;3;37m";
+const MIN_DAY: usize = 1;
+const MAX_DAY: usize = 1;
+
+enum Part {
+    One,
+    Two,
+}
+
+mod day1;
+
+trait Solve<T: ToString> {
+    fn solve(&self, part: Part) -> String {
+        match part {
+            Part::One => self.solve1().to_string(),
+            Part::Two => self.solve2().to_string(),
+        }
+    }
+
+    fn solve1(&self) -> T;
+    fn solve2(&self) -> T;
+}
+
+fn get_day_from_str(day: &str) -> usize {
+    match day {
+        "1" => 1,
+        _ => {
+            println!(
+                "{RED_BOLD}Oops!{RESET} You entered an invalid day. Day must be between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
+            );
+            exit(1)
+        }
+    }
+}
+
+fn get_part_from_str(part: &str) -> Part {
+    match part {
+        "1" => Part::One,
+        "2" => Part::Two,
+        _ => {
+            println!(
+                "{RED_BOLD}Oops!{RESET} You entered an invalid part. Part must be either {MAGENTA_BOLD}1{RESET} or {MAGENTA_BOLD}2{RESET}."
+            );
+            exit(1)
+        }
+    }
+}
+
+fn main() {
+    let mut args = env::args().collect::<VecDeque<_>>();
+    args.pop_front();
+
+    let mut day = None;
+    if let Some(arg) = args.pop_front() {
+        day = Some(get_day_from_str(&arg));
+    };
+
+    let mut part = None;
+    if let Some(arg) = args.pop_front() {
+        part = Some(get_part_from_str(&arg));
+    };
+
+    let mut puzzle = args.pop_front();
+
+    if day.is_none() || part.is_none() || puzzle.is_none() {
+        println!("{}", "\n".repeat(100));
+        println!("Welcome to Wesley's {YELLOW_BOLD}Advent of Code 2025{RESET} project!");
+    }
+
+    if day.is_none() {
+        println!("Please enter a {GREEN_BOLD}number{RESET} to select the day.");
+        println!("\t{GREEN_BOLD}1{RESET}\t{BOLD}Day 1{RESET}: Secret Entrance");
+
+        print!("... ");
+        stdout().flush().unwrap();
+
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        day = Some(get_day_from_str(input.trim()));
+    }
+    let day = day.unwrap();
+
+    if part.is_none() {
+        println!("Please enter a {MAGENTA_BOLD}number{RESET} to select the part.");
+        println!("\t{MAGENTA_BOLD}1{RESET}\t{BOLD}Part 1{RESET}");
+        println!("\t{MAGENTA_BOLD}2{RESET}\t{BOLD}Part 2{RESET}");
+
+        print!("... ");
+        stdout().flush().unwrap();
+
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        part = Some(get_part_from_str(input.trim()));
+    }
+    let part = part.unwrap();
+
+    if puzzle.is_none() {
+        println!("Please enter the desired {CYAN_BOLD}puzzle input filepath{RESET}.");
+
+        if let Ok(puzzles) = read_dir("./puzzles") {
+            let mut puzzles = puzzles.collect::<Vec<_>>();
+            puzzles.sort_by(|a, b| {
+                if a.is_err() && b.is_err() {
+                    std::cmp::Ordering::Equal
+                } else if b.is_err() {
+                    std::cmp::Ordering::Greater
+                } else if a.is_err() {
+                    std::cmp::Ordering::Less
+                } else {
+                    if a.as_ref().unwrap().file_name() == b.as_ref().unwrap().file_name() {
+                        std::cmp::Ordering::Equal
+                    } else if a.as_ref().unwrap().file_name() > b.as_ref().unwrap().file_name() {
+                        std::cmp::Ordering::Greater
+                    } else {
+                        std::cmp::Ordering::Less
+                    }
+                }
+            });
+
+            for puzzle in puzzles {
+                if let Ok(puzzle) = puzzle {
+                    let name = puzzle.file_name();
+                    let name = name.to_string_lossy();
+
+                    let mut nums = Vec::new();
+                    let mut num_str = String::new();
+                    for char in name.chars() {
+                        if char.is_numeric() {
+                            num_str.push(char);
+                        } else {
+                            if let Ok(num) = num_str.parse() {
+                                nums.push(num);
+                                num_str = String::new();
+                            }
+                        }
+                    }
+
+                    if nums.contains(&day) {
+                        println!("\t>\tpuzzles/{CYAN_BOLD}{name}{RESET}");
+                    } else {
+                        println!("\t>\tpuzzles/{name}");
+                    }
+                }
+            }
+        } else {
+            let _ = create_dir("./puzzles");
+        }
+
+        print!("... ");
+        stdout().flush().unwrap();
+
+        let mut input = String::new();
+        stdin().read_line(&mut input).unwrap();
+
+        puzzle = Some(input.trim().to_string());
+    }
+    let puzzle = puzzle.unwrap();
+    let puzzle = match read_to_string(&puzzle) {
+        Ok(puzzle) => puzzle,
+        _ => {
+            println!(
+                "{RED_BOLD}Oops!{RESET} I wasn't able to read that file. Please check and make sure the filepath is correct!"
+            );
+            exit(1)
+        }
+    };
+
+    println!(
+        "{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{}{RESET}",
+        match day {
+            1 => Into::<day1::Puzzle>::into(puzzle).solve(part),
+            _ => {
+                println!(
+                    "{RED_BOLD}Oops!{RESET} You entered an invalid day. Please select between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
+                );
+                exit(1)
+            }
+        }
+    );
+}
