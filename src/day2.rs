@@ -46,7 +46,6 @@ impl Solve<isize> for Puzzle {
         sum
     }
 
-    // answer is less than 35950619190
     fn solve2(&self) -> isize {
         let mut sum = 0;
         for range in &self.ranges {
@@ -64,7 +63,6 @@ impl Solve<isize> for Puzzle {
 
                         if vec.len() >= 2 && vec.windows(2).all(|window| window[0] == window[1]) {
                             sum += n;
-                            // println!("Found match {n} in {range:?}: {} ({})", vec[0], len / l);
                             break;
                         }
                     }
