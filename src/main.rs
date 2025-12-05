@@ -42,7 +42,7 @@ const WHITE_BOLD: &str = "\x1b[1;37m";
 const WHITE_ITALIC: &str = "\x1b[3;37m";
 const WHITE_BOLD_ITALIC: &str = "\x1b[1;3;37m";
 const MIN_DAY: usize = 1;
-const MAX_DAY: usize = 4;
+const MAX_DAY: usize = 5;
 
 enum Part {
     One,
@@ -53,6 +53,7 @@ mod day1;
 mod day2;
 mod day3;
 mod day4;
+mod day5;
 
 trait Solve<T: ToString> {
     fn solve(&self, part: Part) -> String {
@@ -126,6 +127,7 @@ fn main() {
         println!("\t{GREEN_BOLD}2{RESET}\t{BOLD}Day 2{RESET}: Gift Shop");
         println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 3{RESET}: Lobby");
         println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 4{RESET}: Printing Department");
+        println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 5{RESET}: Cafeteria");
 
         print!("... ");
         stdout().flush().unwrap();
@@ -255,6 +257,7 @@ fn main() {
             2 => Into::<day2::Puzzle>::into(puzzle).solve(part),
             3 => Into::<day3::Puzzle>::into(puzzle).solve(part),
             4 => Into::<day4::Puzzle>::into(puzzle).solve(part),
+            5 => Into::<day5::Puzzle>::into(puzzle).solve(part),
             _ => {
                 println!(
                     "{RED_BOLD}Oops!{RESET} You entered an invalid day. Please select between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
