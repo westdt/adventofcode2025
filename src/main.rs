@@ -126,8 +126,8 @@ fn main() {
         println!("\t{GREEN_BOLD}1{RESET}\t{BOLD}Day 1{RESET}: Secret Entrance");
         println!("\t{GREEN_BOLD}2{RESET}\t{BOLD}Day 2{RESET}: Gift Shop");
         println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 3{RESET}: Lobby");
-        println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 4{RESET}: Printing Department");
-        println!("\t{GREEN_BOLD}3{RESET}\t{BOLD}Day 5{RESET}: Cafeteria");
+        println!("\t{GREEN_BOLD}4{RESET}\t{BOLD}Day 4{RESET}: Printing Department");
+        println!("\t{GREEN_BOLD}5{RESET}\t{BOLD}Day 5{RESET}: Cafeteria");
 
         print!("... ");
         stdout().flush().unwrap();
