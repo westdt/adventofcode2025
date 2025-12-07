@@ -58,11 +58,15 @@ mod day6;
 mod day7;
 
 trait Solve<T: ToString> {
-    fn solve(&self, part: Part) -> String {
-        match part {
-            Part::One => self.solve1().to_string(),
-            Part::Two => self.solve2().to_string(),
-        }
+    fn solve(&self, part: Part) -> (String, f64) {
+        let timer = std::time::Instant::now();
+        (
+            match part {
+                Part::One => self.solve1().to_string(),
+                Part::Two => self.solve2().to_string(),
+            },
+            timer.elapsed().as_secs_f64(),
+        )
     }
 
     fn solve1(&self) -> T;
@@ -237,7 +241,7 @@ fn main() {
         Ok(puzzle) => puzzle,
         _ => {
             println!(
-                "{RED_BOLD}Oops!{RESET} I wasn't able to read that file. Please check and make sure the filepath is correct!"
+                "\r{RED_BOLD}Oops!{RESET} I wasn't able to read that file. Please check and make sure the filepath is correct!"
             );
             exit(1)
         }
@@ -254,22 +258,22 @@ fn main() {
         }
     });
 
-    println!(
-        "\r{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{}{RESET}",
-        match day {
-            1 => Into::<day1::Puzzle>::into(puzzle).solve(part),
-            2 => Into::<day2::Puzzle>::into(puzzle).solve(part),
-            3 => Into::<day3::Puzzle>::into(puzzle).solve(part),
-            4 => Into::<day4::Puzzle>::into(puzzle).solve(part),
-            5 => Into::<day5::Puzzle>::into(puzzle).solve(part),
-            6 => Into::<day6::Puzzle>::into(puzzle).solve(part),
-            7 => Into::<day7::Puzzle>::into(puzzle).solve(part),
-            _ => {
-                println!(
-                    "{RED_BOLD}Oops!{RESET} You entered an invalid day. Please select between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
-                );
-                exit(1)
-            }
+    let (result, time) = match day {
+        1 => Into::<day1::Puzzle>::into(puzzle).solve(part),
+        2 => Into::<day2::Puzzle>::into(puzzle).solve(part),
+        3 => Into::<day3::Puzzle>::into(puzzle).solve(part),
+        4 => Into::<day4::Puzzle>::into(puzzle).solve(part),
+        5 => Into::<day5::Puzzle>::into(puzzle).solve(part),
+        6 => Into::<day6::Puzzle>::into(puzzle).solve(part),
+        7 => Into::<day7::Puzzle>::into(puzzle).solve(part),
+        _ => {
+            println!(
+                "\r{RED_BOLD}Oops!{RESET} You entered an invalid day. Please select between {GREEN_BOLD}{MIN_DAY}{RESET}-{GREEN_BOLD}{MAX_DAY}{RESET}."
+            );
+            exit(1)
         }
+    };
+    println!(
+        "\r{GREEN_BOLD_ITALIC}Eureka!{RESET} The answer is {YELLOW_BOLD}{result}{RESET}\nCompleted in {CYAN_ITALIC}{time}s{RESET}"
     );
 }

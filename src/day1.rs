@@ -1,4 +1,4 @@
-use crate::{BLUE_BOLD, RED_BOLD, RESET, Solve};
+use crate::Solve;
 
 #[derive(Clone, Debug)]
 enum Direction {
@@ -23,9 +23,9 @@ impl Into<Puzzle> for String {
                 let direction = match step.chars().nth(0) {
                     Some('L') => Direction::Left,
                     Some('R') => Direction::Right,
-                    _ => {panic!("{RED_BOLD}Oops!{RESET} Invalid input '{step}'. Direction should be either {BLUE_BOLD}L{RESET} or {RED_BOLD}R{RESET}")},
+                    _ => {panic!()},
                 };
-                let amount: isize = step[1..step.len()].parse().expect(&format!("{RED_BOLD}Oops!{RESET} Invalid input '{step}'. Amount should be an integer."));
+                let amount: isize = step[1..step.len()].parse().unwrap();
                 
                 Step {
                     direction,
